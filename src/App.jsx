@@ -2130,13 +2130,7 @@ const OpenPayView = ({ total, onPaymentComplete, onCancel }) => {
 // --- MAIN APP ---
 
 const App = () => {
-  const [user, setUser] = useState({
-    name: 'Usuario30891',
-    role: 'Compras Corporativas',
-    email: 'ebriseno@axtel.com.mx',
-    creditLimit: 500000,
-    balance: 125400
-  });
+  const [user, setUser] = useState(null);
   const [view, setView] = useState(() => window.history.state?.view || 'home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [products, setProducts] = useState([]);
