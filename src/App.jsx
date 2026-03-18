@@ -52,7 +52,8 @@ const PRODUCT_CARPET = "/assets/b2b_industrial_carpet_roll.png";
 const PRODUCT_FIBER = "/assets/b2b_specialized_fiber_reels.png";
 const PRODUCT_ADHESIVE = "/assets/b2b_industrial_adhesive_drums.png";
 
-const API_URL = 'http://localhost:3001/api';
+// En desarrollo: localhost, en producción: Azure Functions
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // --- COMPONENTS ---
 
