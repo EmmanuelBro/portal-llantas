@@ -121,22 +121,21 @@ module.exports = async function (context, req) {
         availability: { 'Chihuahua': 30, 'Toluca': 15 }
       },
       ...Array.from({ length: 24 }).map((_, i) => {
-        const imgIndex = i % 6;
-        const images = [
-          '/tire_michelin_v2.png',
-          '/tire_continental_v2.png',
-          '/tire_bridgestone_v2.png',
-          '/tire_pirelli_v2.png',
-          '/tire_bfg_v2.png',
-          '/tire_heavy_truck_v2.png'
+        const nexenModels = [
+          { name: "Nexen N'Fera Sport UHP", image: '/tire_nexen_sport.png', category: 'Auto Premium', basePrice: 2800 },
+          { name: "Nexen Roadian GTX SUV", image: '/tire_nexen_suv.png', category: 'Camioneta / SUV', basePrice: 3100 },
+          { name: "Nexen Roadian MTX Mud Terrain", image: '/tire_nexen_at.png', category: 'Todo Terreno', basePrice: 4200 },
+          { name: "Nexen Winguard Winspike Winter", image: '/tire_nexen_winter.png', category: 'Invierno', basePrice: 2950 }
         ];
+        const model = nexenModels[i % 4];
+
         return {
-          id: `TYRE-GEN-${700 + i}`,
-          name: `Llantas Nexen Roadian HTX RH5 Series ${i + 1}`,
-          category: i % 2 === 0 ? 'Camioneta / SUV' : 'Auto Premium',
-          price: 2100.00 + (i * 150),
+          id: `TYRE-NEX-${700 + i}`,
+          name: `${model.name} Series ${Math.floor(i / 4) + 1}`,
+          category: model.category,
+          price: model.basePrice + (i * 20),
           unit: 'Pieza',
-          image: '/tire_nexen_v2.png',
+          image: model.image,
           specs: [`Medida: 2${i % 9}5/65R1${i % 5 + 6}`, 'Tracción: A', 'Temperatura: B'],
           techSpecs: {
             width: `2${i % 9}5`,
