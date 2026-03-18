@@ -42,7 +42,7 @@ import {
   Building2,
   AlertCircle
 } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 // Assets
 const LOGO_SRC = "/assets/tech_flow_logo.png";
@@ -266,6 +266,16 @@ const HomeDashboard = ({ user, onViewChange }) => {
       image: '/banner2_clean.png',
       title: 'Logística de Clase Mundial',
       subtitle: 'Distribución eficiente y tiempos de entrega garantizados.'
+    },
+    {
+      image: '/cat_account_v2.png',
+      title: 'Control Financiero Integral',
+      subtitle: 'Accede a tu estado de cuenta y facturación en tiempo real.'
+    },
+    {
+      image: '/promo_realistic.png',
+      title: 'Promociones Exclusivas',
+      subtitle: 'Aprovecha descuentos especiales y financiamiento preferencial.'
     }
   ];
 
@@ -414,21 +424,21 @@ const HomeDashboard = ({ user, onViewChange }) => {
           {[
             {
               icon: <ShieldCheck size={28} color="var(--accent-blue)" />,
-              title: 'Calidad garantizada',
-              desc: 'Productos con certificación OEM y trazabilidad completa para tu operación.',
-              action: 'Ver criterios'
+              title: 'Quiénes somos',
+              desc: 'Somos el canal mayorista líder en soluciones de neumáticos para flotas y distribuidores. Con más de 20 años de experiencia, entregamos calidad y servicio especializado.',
+              action: 'Conoce más'
             },
             {
-              icon: <Truck size={28} color="var(--accent-blue)" />,
-              title: 'Logística inteligente',
-              desc: 'Consulta tiempos de entrega por sucursal y planea pedidos por volumen.',
-              action: 'Planificar envío'
+              icon: <Building2 size={28} color="var(--accent-blue)" />,
+              title: 'Nuestra trayectoria',
+              desc: 'Desde origen local hasta presencia nacional: conoce cómo evolucionamos para convertirnos en un socio estratégico para empresas de transporte y logística.',
+              action: 'Ver historia'
             },
             {
-              icon: <CreditCard size={28} color="var(--accent-blue)" />,
-              title: 'Condiciones y pagos',
-              desc: 'Administra tu línea de crédito, facturas electrónicas y descuentos especiales.',
-              action: 'Ver opciones'
+              icon: <Smartphone size={28} color="var(--accent-blue)" />,
+              title: 'Soporte y contacto',
+              desc: '¿Necesitas ayuda con un pedido o cotización? Contáctanos para atención personalizada, asesoría técnica y planes a medida.',
+              action: 'Contactar'
             }
           ].map((item, i) => (
             <div key={i} style={{
@@ -846,7 +856,7 @@ const ProductCard = ({ product, onAddToCart, onUpdateQty, cartItem }) => {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
             <div>
-              <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary-navy)' }}>${product.price.toFixed(2)}</p>
+              <p style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary-navy)' }}>${product.price.toFixed(2)} <span style={{ fontSize: '12px', color: 'var(--grey-text)' }}>MXN</span></p>
               <p style={{ fontSize: '12px', color: 'var(--grey-text)' }}>por {product.unit}</p>
             </div>
           </div>
@@ -1214,158 +1224,568 @@ const CatalogView = ({ products, onAddToCart, onUpdateQty, cart, searchTerm, onS
 };
 
 const AccountStatement = ({ user }) => {
-  const data = [
+  const [selectedNoteBar, setSelectedNoteBar] = useState('Selecciona una barra del gráfico para ver más información.');
+  const [selectedNotePie, setSelectedNotePie] = useState('Selecciona una sección del gráfico para ver más información.');
+
+  const statementData = [
     { name: 'Ene', cargo: 45000, abono: 38000 },
     { name: 'Feb', cargo: 52000, abono: 60000 },
     { name: 'Mar', cargo: user.balance, abono: 25000 },
+    { name: 'Abr', cargo: 47000, abono: 52000 },
+    { name: 'May', cargo: 51000, abono: 48000 }
+  ];
+
+  const spendCategories = [
+    { name: 'Neumáticos', value: 58 },
+    { name: 'Logística', value: 18 },
+    { name: 'Servicios', value: 12 },
+    { name: 'Otros', value: 12 }
+  ];
+
+  const COLORS = ['var(--accent-blue)', 'var(--primary-navy)', 'var(--status-operative)', 'var(--status-caution)'];
+
+  const cards = [
+    {
+      label: 'Saldo Actual',
+      value: `$${user?.balance?.toLocaleString() || '0'}`,
+      icon: <CreditCard size={22} color="var(--status-stop)" />,
+      topColor: 'var(--status-stop)'
+    },
+    {
+      label: 'Línea de Crédito',
+      value: `$${user?.creditLimit?.toLocaleString() || '0'}`,
+      icon: <Shield size={22} color="var(--primary-navy)" />,
+      topColor: 'var(--primary-navy)'
+    },
+    {
+      label: 'Disponible',
+      value: `$${((user?.creditLimit || 0) - (user?.balance || 0)).toLocaleString()}`,
+      icon: <CheckCircle2 size={22} color="var(--status-operative)" />,
+      topColor: 'var(--status-operative)'
+    },
+    {
+      label: 'Facturas pendientes',
+      value: '3',
+      icon: <FileText size={22} color="var(--status-caution)" />,
+      topColor: 'var(--status-caution)'
+    },
+    {
+      label: 'Última factura',
+      value: '2026-03-12',
+      icon: <Clock size={22} color="var(--grey-text)" />,
+      topColor: 'var(--grey-text)'
+    }
   ];
 
   return (
     <div style={{ animation: 'fadeIn 0.4s ease' }}>
       <h2 style={{ fontSize: '28px', color: 'var(--primary-navy)', marginBottom: '24px' }}>Estado de Cuenta Corporativo</h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '32px' }}>
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', border: '1px solid var(--grey-border)', borderTop: '4px solid var(--primary-navy)' }}>
-          <p style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--grey-text)', marginBottom: '8px' }}>Saldo Actual</p>
-          <p style={{ fontSize: '32px', fontWeight: 800, color: 'var(--status-stop)' }}>${user?.balance?.toLocaleString() || '0'}</p>
-        </div>
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', border: '1px solid var(--grey-border)', borderTop: '4px solid var(--primary-navy)' }}>
-          <p style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--grey-text)', marginBottom: '8px' }}>Línea de Crédito</p>
-          <p style={{ fontSize: '32px', fontWeight: 800, color: 'var(--primary-navy)' }}>${user?.creditLimit?.toLocaleString() || '0'}</p>
-        </div>
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', border: '1px solid var(--grey-border)', borderTop: '4px solid var(--primary-navy)' }}>
-          <p style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--grey-text)', marginBottom: '8px' }}>Disponible</p>
-          <p style={{ fontSize: '32px', fontWeight: 800, color: 'var(--status-operative)' }}>${((user?.creditLimit || 0) - (user?.balance || 0)).toLocaleString()}</p>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+        {cards.map((card, index) => (
+          <div key={index} style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', border: '1px solid var(--grey-border)', borderTop: `4px solid ${card.topColor}`, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <p style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--grey-text)', marginBottom: 0 }}>{card.label}</p>
+              {card.icon}
+            </div>
+            <p style={{ fontSize: '32px', fontWeight: 800, color: 'var(--primary-navy)', margin: 0 }}>{card.value}</p>
+          </div>
+        ))}
       </div>
 
-      <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', border: '1px solid var(--grey-border)', marginBottom: '32px' }}>
-        <h3 style={{ marginBottom: '24px' }}>Histórico de Movimientos</h3>
-        <div style={{ height: '300px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="cargo" fill="#EF4444" radius={[4, 4, 0, 0]} name="Cargos ($)" />
-              <Bar dataKey="abono" fill="#10B981" radius={[4, 4, 0, 0]} name="Abonos ($)" />
-            </BarChart>
-          </ResponsiveContainer>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '24px', marginBottom: '32px' }}>
+        <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', border: '1px solid var(--grey-border)' }}>
+          <h3 style={{ marginBottom: '24px' }}>Histórico de Movimientos</h3>
+          <div style={{ height: '280px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={statementData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.2} />
+                <XAxis dataKey="name" tick={{ fill: 'var(--grey-text)' }} />
+                <YAxis tick={{ fill: 'var(--grey-text)' }} />
+                <Tooltip />
+                <Legend verticalAlign="top" height={36} />
+                <Bar
+                  dataKey="cargo"
+                  fill="var(--status-stop)"
+                  radius={[6, 6, 0, 0]}
+                  name="Cargos"
+                  onClick={(data) => setSelectedNoteBar(`Mes: ${data.name} — Cargos: $${data.cargo.toLocaleString()}. Los cargos representan montos facturados durante el mes.`)}
+                />
+                <Bar
+                  dataKey="abono"
+                  fill="var(--status-operative)"
+                  radius={[6, 6, 0, 0]}
+                  name="Abonos"
+                  onClick={(data) => setSelectedNoteBar(`Mes: ${data.name} — Abonos: $${data.abono.toLocaleString()}. Los abonos son pagos recibidos en el mes.`)}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div style={{ backgroundColor: 'var(--bg-slate)', borderRadius: '12px', padding: '18px', marginTop: '18px', border: '1px solid rgba(0,0,0,0.08)' }}>
+            <p style={{ margin: 0, color: 'var(--primary-navy)', fontWeight: 600 }}>Detalle seleccionado:</p>
+            <p style={{ margin: '8px 0 0', color: 'var(--grey-text)', fontSize: '14px' }}>{selectedNoteBar}</p>
+          </div>
+        </div>
+
+        <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', border: '1px solid var(--grey-border)' }}>
+          <h3 style={{ marginBottom: '24px' }}>Distribución de gastos</h3>
+          <div style={{ height: '280px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={spendCategories}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={4}
+                  onClick={(entry, index) => {
+                    const payload = entry?.payload ?? entry;
+                    const name = payload?.name ?? 'categoría';
+                    const value = payload?.value ?? 0;
+                    setSelectedNotePie(`Categoría: ${name} — Representa ${value}% del gasto total estimado.`);
+                  }}
+                >
+                  {spendCategories.map((entry, idx) => (
+                    <Cell key={entry.name} fill={COLORS[idx % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Legend verticalAlign="bottom" height={48} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div style={{ backgroundColor: 'var(--bg-slate)', borderRadius: '12px', padding: '18px', marginTop: '18px', border: '1px solid rgba(0,0,0,0.08)' }}>
+            <p style={{ margin: 0, color: 'var(--primary-navy)', fontWeight: 600 }}>Detalle seleccionado:</p>
+            <p style={{ margin: '8px 0 0', color: 'var(--grey-text)', fontSize: '14px' }}>{selectedNotePie}</p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-const PromotionsView = () => (
-  <div style={{ animation: 'fadeIn 0.4s ease' }}>
-    <h2 style={{ fontSize: '32px', color: 'var(--primary-navy)', marginBottom: '8px', fontWeight: 800 }}>Promociones Vigentes</h2>
-    <p style={{ color: 'var(--grey-text)', fontSize: '18px', marginBottom: '32px' }}>Oportunidades exclusivas para distribuidores Autorizados.</p>
+const PromotionsView = () => {
+  const promotions = [
+    {
+      title: 'Descuento por Volumen',
+      subtitle: 'Ahorra hasta 15% en pedidos mayores a 40 llantas.',
+      details: [
+        '15% de descuento a partir de 40 piezas.',
+        'Aplicable en marcas seleccionadas (Michelin, Bridgestone, Continental).',
+        'Válido hasta agotar existencias y sujeto a inventario en almacén.'
+      ],
+      period: 'Válido hasta 30 Abr 2026',
+      theme: { from: '#1e3a8a', to: '#3b82f6' },
+      bg: '/promo_realistic.png'
+    },
+    {
+      title: 'Financiamiento Preferencial',
+      subtitle: 'Financiamiento a 60 días sin intereses para clientes registrados.',
+      details: [
+        'Aprobación en menos de 24 horas.',
+        'Requiere historial de compras de al menos 6 meses.',
+        'Aplicable solo para facturación corporativa.'
+      ],
+      period: 'Disponible todo 2026',
+      theme: { from: '#10b981', to: '#059669' },
+      bg: '/cat_promos.png'
+    },
+    {
+      title: 'Entrega Exprés',
+      subtitle: 'Entrega garantizada en 48 horas para pedidos críticos.',
+      details: [
+        'Cobertura en 12 ciudades principales.',
+        'Seguimiento en tiempo real de embarques.',
+        'Soporte dedicado de logística.'
+      ],
+      period: 'Promoción continua',
+      theme: { from: '#f59e0b', to: '#d97706' },
+      bg: '/banner2_clean.png'
+    }
+  ];
 
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px' }}>
-      {[
-        {
-          title: 'Combo Flota Pesada',
-          desc: 'En la compra de 12 llantas All-Terrain Ultra X, obtén 4 servicios de alineación y balanceo sin costo.',
-          code: 'PROMO-HEAVY-24',
-          validUntil: '31 Mar 2026',
-          gradient: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'
-        },
-        {
-          title: 'Liquidación de Temporada',
-          desc: '30% de descuento directo en toda la línea Michelin Pilot Sport 4S (Modelos 2024).',
-          code: 'Michelin30OFF',
-          validUntil: '15 Abr 2026',
-          gradient: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)'
-        },
-        {
-          title: 'Bono por Volumen Premium',
-          desc: 'Rebaja adicional del 5% al superar las 50 unidades en pedidos de Continental PremiumContact.',
-          code: 'VOL-PREMIUM-5',
-          validUntil: '31 Mar 2026',
-          gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-        },
-        {
-          title: 'Crédito Extendido',
-          desc: 'Paga a 60 días sin intereses en pedidos a partir de $150,000 MXN durante este mes.',
-          code: 'LOANS-AXTEL',
-          validUntil: '30 Jun 2026',
-          gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-        }
-      ].map((promo, idx) => (
-        <div key={idx} style={{
-          background: promo.gradient,
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex(i => (i + 1) % promotions.length);
+    }, 7000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const active = promotions[activeIndex];
+
+  return (
+    <div style={{ animation: 'fadeIn 0.4s ease' }}>
+      <h2 style={{ fontSize: '32px', color: 'var(--primary-navy)', marginBottom: '8px', fontWeight: 800 }}>Promociones Vigentes</h2>
+      <p style={{ color: 'var(--grey-text)', fontSize: '18px', marginBottom: '32px' }}>
+        Aprovecha las mejores condiciones de compra, crédito y logística para mantener tu flota siempre en movimiento.
+      </p>
+
+      <div style={{ position: 'relative', marginBottom: '32px' }}>
+        <div style={{
+          background: `linear-gradient(135deg, ${active.theme.from} 0%, ${active.theme.to} 65%, rgba(0,0,0,0.7) 100%), url(${active.bg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           borderRadius: '16px',
-          padding: '32px',
+          padding: '40px 36px',
           color: 'white',
-          position: 'relative',
-          overflow: 'hidden',
-          boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
+          boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
-          minHeight: '220px'
+          gap: '20px',
+          minHeight: '260px'
         }}>
-          <div>
-            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px' }}>{promo.title}</h3>
-            <p style={{ fontSize: '15px', opacity: 0.9, lineHeight: '1.4' }}>{promo.desc}</p>
-          </div>
-          <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, border: '1px dashed white' }}>
-              Código: {promo.code}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <div>
+              <h3 style={{ fontSize: '28px', margin: 0 }}>{active.title}</h3>
+              <p style={{ marginTop: '8px', fontSize: '16px', opacity: 0.9 }}>{active.subtitle}</p>
             </div>
-            <div style={{ fontSize: '12px', opacity: 0.8 }}>Vence: {promo.validUntil}</div>
+            <span style={{ fontSize: '12px', opacity: 0.85, textTransform: 'uppercase' }}>{active.period}</span>
+          </div>
+
+          <ul style={{ paddingLeft: '18px', margin: 0, fontSize: '14px', lineHeight: 1.6 }}>
+            {active.details.map((item, idx) => (
+              <li key={idx} style={{ marginBottom: '6px' }}>{item}</li>
+            ))}
+          </ul>
+
+          <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
+            {promotions.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveIndex(idx)}
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  borderRadius: '50%',
+                  border: 'none',
+                  backgroundColor: idx === activeIndex ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)',
+                  cursor: 'pointer'
+                }}
+              />
+            ))}
           </div>
         </div>
-      ))}
-    </div>
-  </div>
-);
+      </div>
 
-const BillingView = () => (
-  <div style={{ animation: 'fadeIn 0.4s ease' }}>
-    <h2 style={{ fontSize: '28px', color: 'var(--primary-navy)', marginBottom: '24px' }}>Facturación Electrónica (CFDI)</h2>
-    <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--grey-border)', padding: '0' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ textAlign: 'left', backgroundColor: 'var(--primary-navy)', color: 'white' }}>
-            <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Folio Fiscal (UUID)</th>
-            <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Fecha</th>
-            <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Monto</th>
-            <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Estatus</th>
-            <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[
-            { uuid: 'E456-F123-B90A', date: '2026-03-12', total: '$14,500.00', status: 'Pagada' },
-            { uuid: 'A902-D881-C110', date: '2026-03-15', total: '$32,100.00', status: 'Pendiente' }
-          ].map((fact, idx) => (
-            <tr key={idx} style={{ borderBottom: '1px solid var(--bg-slate)' }}>
-              <td style={{ padding: '16px 24px', fontSize: '14px' }} className="mono">{fact.uuid}</td>
-              <td style={{ padding: '16px 24px', fontSize: '14px' }}>{fact.date}</td>
-              <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: 600 }}>{fact.total}</td>
-              <td style={{ padding: '16px 24px' }}>
-                <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '12px', backgroundColor: fact.status === 'Pagada' ? 'rgba(40, 167, 69, 0.1)' : 'rgba(255, 193, 7, 0.1)', color: fact.status === 'Pagada' ? 'var(--status-operative)' : '#b58900' }}>
-                  {fact.status}
-                </span>
-              </td>
-              <td style={{ padding: '16px 24px' }}>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--grey-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}><FileText size={12} /> PDF</button>
-                  <button style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--grey-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}><FileText size={12} color="var(--accent-blue)" /> XML</button>
-                </div>
-              </td>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
+        {promotions.map((promo, idx) => (
+          <div key={idx} style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', border: '1px solid var(--grey-border)', boxShadow: '0 10px 20px rgba(0,0,0,0.06)' }}>
+            <h4 style={{ marginBottom: '12px', fontSize: '18px', color: 'var(--primary-navy)' }}>{promo.title}</h4>
+            <p style={{ marginBottom: '16px', color: 'var(--grey-text)' }}>{promo.subtitle}</p>
+            <ul style={{ paddingLeft: '18px', margin: 0, color: 'var(--grey-text)', fontSize: '14px', lineHeight: 1.6 }}>
+              {promo.details.map((d, i) => <li key={i} style={{ marginBottom: '6px' }}>{d}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+const BillingView = () => {
+  const invoices = [
+    { uuid: 'E456-F123-B90A', date: '2026-03-12', total: '$14,500.00', status: 'Pagada' },
+    { uuid: 'A902-D881-C110', date: '2026-03-15', total: '$32,100.00', status: 'Pendiente' },
+    { uuid: 'C334-G742-D005', date: '2026-03-08', total: '$28,750.50', status: 'Pagada' },
+    { uuid: 'B111-H926-E234', date: '2026-03-01', total: '$45,600.00', status: 'Pagada' },
+    { uuid: 'F567-J234-K891', date: '2026-02-28', total: '$19,250.75', status: 'Pagada' },
+    { uuid: 'D789-L456-M012', date: '2026-02-21', total: '$56,800.00', status: 'Pagada' },
+    { uuid: 'G890-N678-O345', date: '2026-02-15', total: '$23,100.25', status: 'Pagada' },
+    { uuid: 'H012-P901-Q567', date: '2026-02-10', total: '$37,450.00', status: 'Pagada' }
+  ];
+
+  const downloadFile = (filename, content, mime) => {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadPdf = (uuid) => {
+    const content = `Factura: ${uuid}\n\nEste es un PDF simulado generado por el portal.`;
+    downloadFile(`factura-${uuid}.pdf`, content, 'application/pdf');
+  };
+
+  const downloadXml = (uuid) => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<invoice>\n  <uuid>${uuid}</uuid>\n  <amount>...</amount>\n</invoice>`;
+    downloadFile(`factura-${uuid}.xml`, xml, 'application/xml');
+  };
+
+  return (
+    <div style={{ animation: 'fadeIn 0.4s ease' }}>
+      <h2 style={{ fontSize: '28px', color: 'var(--primary-navy)', marginBottom: '24px' }}>Facturación Electrónica (CFDI)</h2>
+      <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--grey-border)', padding: '0' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ textAlign: 'left', backgroundColor: 'var(--primary-navy)', color: 'white' }}>
+              <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Folio Fiscal (UUID)</th>
+              <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Fecha</th>
+              <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Monto</th>
+              <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Estatus</th>
+              <th style={{ padding: '16px 24px', fontSize: '12px', textTransform: 'uppercase' }}>Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {invoices.map((fact, idx) => (
+              <tr key={idx} style={{ borderBottom: '1px solid var(--bg-slate)' }}>
+                <td style={{ padding: '16px 24px', fontSize: '14px' }} className="mono">{fact.uuid}</td>
+                <td style={{ padding: '16px 24px', fontSize: '14px' }}>{fact.date}</td>
+                <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: 600 }}>{fact.total}</td>
+                <td style={{ padding: '16px 24px' }}>
+                  <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '12px', backgroundColor: fact.status === 'Pagada' ? 'rgba(40, 167, 69, 0.1)' : 'rgba(255, 193, 7, 0.1)', color: fact.status === 'Pagada' ? 'var(--status-operative)' : '#b58900' }}>
+                    {fact.status}
+                  </span>
+                </td>
+                <td style={{ padding: '16px 24px' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={() => downloadPdf(fact.uuid)}
+                      style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--grey-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}
+                    >
+                      <FileText size={12} /> PDF
+                    </button>
+                    <button
+                      onClick={() => downloadXml(fact.uuid)}
+                      style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--grey-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}
+                    >
+                      <FileText size={12} color="var(--accent-blue)" /> XML
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-const CartView = ({ items, onUpdateQty, onRemove, onCheckout }) => {
+const OrdersView = () => {
+  const [expandedOrder, setExpandedOrder] = useState(null);
+
+  const orders = [
+    {
+      folio: 'ORD-2026-000142',
+      orderDate: '2026-03-15',
+      expectedDelivery: '2026-03-18',
+      status: 'En tránsito',
+      statusColor: 'var(--status-operative)',
+      total: 45600,
+      items: [
+        { name: 'Llanta LT265/70R16 Michelin', quantity: 4, unit: 'piezas' },
+        { name: 'Llanta P195/65R15 Continental', quantity: 8, unit: 'piezas' }
+      ],
+      referenceCode: 'MX-CDMX-001',
+      carrierName: 'Logística Expedita'
+    },
+    {
+      folio: 'ORD-2026-000139',
+      orderDate: '2026-03-10',
+      expectedDelivery: '2026-03-12',
+      status: 'Entregado',
+      statusColor: 'var(--status-operative)',
+      total: 32500,
+      items: [
+        { name: 'Llanta 215/55R17 Bridgestone', quantity: 12, unit: 'piezas' }
+      ],
+      referenceCode: 'MX-MTY-002',
+      carrierName: 'FedEx Logística',
+      deliveredDate: '2026-03-12'
+    },
+    {
+      folio: 'ORD-2026-000128',
+      orderDate: '2026-02-28',
+      expectedDelivery: '2026-03-05',
+      status: 'Entregado',
+      statusColor: 'var(--status-operative)',
+      total: 78200,
+      items: [
+        { name: 'Llanta 225/45R18 Pirelli', quantity: 20, unit: 'piezas' },
+        { name: 'Gel protector de llantas', quantity: 5, unit: 'cajas' }
+      ],
+      referenceCode: 'MX-GTO-003',
+      carrierName: 'DHL México',
+      deliveredDate: '2026-03-05'
+    },
+    {
+      folio: 'ORD-2026-000115',
+      orderDate: '2026-02-15',
+      expectedDelivery: '2026-02-20',
+      status: 'Entregado',
+      statusColor: 'var(--status-operative)',
+      total: 61450,
+      items: [
+        { name: 'Llanta 175/65R14 Goodyear', quantity: 16, unit: 'piezas' }
+      ],
+      referenceCode: 'MX-NL-004',
+      carrierName: 'Estafeta',
+      deliveredDate: '2026-02-20'
+    }
+  ];
+
+  const getStatusBadge = (status) => {
+    const styles = {
+      'En tránsito': { bg: 'rgba(59, 130, 246, 0.1)', color: '#1e40af', label: '⏱️ En tránsito' },
+      'Entregado': { bg: 'rgba(34, 197, 94, 0.1)', color: '#15803d', label: '✓ Entregado' },
+      'Pendiente': { bg: 'rgba(245, 158, 11, 0.1)', color: '#b45309', label: '⊙ Pendiente' }
+    };
+    return styles[status] || styles['Pendiente'];
+  };
+
+  return (
+    <div style={{ animation: 'fadeIn 0.4s ease' }}>
+      <h2 style={{ fontSize: '28px', color: 'var(--primary-navy)', marginBottom: '8px' }}>Mis Órdenes</h2>
+      <p style={{ fontSize: '15px', color: 'var(--grey-text)', marginBottom: '32px' }}>Historial y estado de tus pedidos de llantas y accesorios.</p>
+
+      <div style={{ display: 'grid', gap: '16px' }}>
+        {orders.map((order, idx) => {
+          const badge = getStatusBadge(order.status);
+          return (
+            <div
+              key={idx}
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                border: '1px solid var(--grey-border)',
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              {/* Header */}
+              <div style={{ padding: '20px 24px', backgroundColor: 'var(--bg-slate)', borderBottom: '1px solid var(--grey-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--primary-navy)', fontWeight: 800 }}>{order.folio}</h3>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: 'var(--grey-text)' }}>Código de referencia: <span style={{ fontWeight: 600 }}>{order.referenceCode}</span></p>
+                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--grey-text)' }}>Transportista: <span style={{ fontWeight: 600 }}>{order.carrierName}</span></p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ padding: '6px 12px', backgroundColor: badge.bg, color: badge.color, borderRadius: '8px', fontSize: '12px', fontWeight: 700, marginBottom: '12px' }}>
+                    {badge.label}
+                  </div>
+                  <p style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: 'var(--primary-navy)' }}>${order.total.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div style={{ padding: '20px 24px', display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: '16px', alignItems: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '11px', textTransform: 'uppercase', color: 'var(--grey-text)', fontWeight: 700 }}>Fecha Pedido</p>
+                  <p style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: 'var(--primary-navy)' }}>{order.orderDate}</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+                  <div style={{ flex: 1, height: '2px', backgroundColor: 'var(--status-operative)' }} />
+                  <Truck size={20} color="var(--status-operative)" />
+                  <div style={{ flex: 1, height: '2px', backgroundColor: 'var(--status-operative)' }} />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '11px', textTransform: 'uppercase', color: 'var(--grey-text)', fontWeight: 700 }}>
+                    {order.status === 'Entregado' ? 'Entregado el' : 'Entrega esperada'}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: 'var(--primary-navy)' }}>
+                    {order.deliveredDate || order.expectedDelivery}
+                  </p>
+                </div>
+              </div>
+
+              {/* Items */}
+              <div style={{ padding: '20px 24px', borderTop: '1px solid var(--grey-border)', backgroundColor: '#fafbfc' }}>
+                <p style={{ margin: '0 0 16px 0', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--grey-text)' }}>Artículos Pedidos</p>
+                <div style={{ display: 'grid', gap: '12px' }}>
+                  {order.items.map((item, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ margin: 0, fontSize: '14px', color: 'var(--primary-navy)', fontWeight: 600 }}>{item.name}</p>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--grey-text)' }}>Cantidad: {item.quantity} {item.unit}</p>
+                      </div>
+                      <div style={{ width: '60px', padding: '6px 12px', backgroundColor: 'var(--bg-slate)', borderRadius: '6px', textAlign: 'center' }}>
+                        <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--status-operative)' }}>×{item.quantity}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div style={{ padding: '16px 24px', display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid var(--grey-border)' }}>
+                <button
+                  onClick={() => setExpandedOrder(expandedOrder === idx ? null : idx)}
+                  style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--accent-blue)', backgroundColor: expandedOrder === idx ? 'var(--accent-blue)' : 'white', color: expandedOrder === idx ? 'white' : 'var(--accent-blue)', cursor: 'pointer', fontSize: '13px', fontWeight: 600, transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  📄 {expandedOrder === idx ? 'Ocultar Detalles' : 'Ver Detalles'}
+                </button>
+              </div>
+
+              {/* Expanded Details */}
+              {expandedOrder === idx && (
+                <div style={{ padding: '20px 24px', borderTop: '1px solid var(--grey-border)', backgroundColor: '#f9fafb', animation: 'fadeIn 0.3s ease' }}>
+                  <h4 style={{ margin: '0 0 16px 0', fontSize: '14px', fontWeight: 700, color: 'var(--primary-navy)' }}>📋 Información Completa</h4>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                    {/* Detalles de Envío */}
+                    <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid var(--grey-border)' }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '11px', textTransform: 'uppercase', color: 'var(--grey-text)', fontWeight: 700 }}>Dirección de Entrega</p>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--primary-navy)', fontWeight: 600 }}>México, Ciudad de México</p>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: 'var(--grey-text)' }}>Domicilio Registrado en Sistema</p>
+                    </div>
+
+                    {/* Contacto */}
+                    <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid var(--grey-border)' }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '11px', textTransform: 'uppercase', color: 'var(--grey-text)', fontWeight: 700 }}>Contacto de Entrega</p>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--primary-navy)', fontWeight: 600 }}>ebriseno@axtel.com.mx</p>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: 'var(--grey-text)' }}>+52 55 1234 5678</p>
+                    </div>
+
+                    {/* Método de Pago */}
+                    <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid var(--grey-border)' }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '11px', textTransform: 'uppercase', color: 'var(--grey-text)', fontWeight: 700 }}>Método de Pago</p>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--primary-navy)', fontWeight: 600 }}>Tarjeta de Crédito</p>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: 'var(--grey-text)' }}>**** **** **** 4242</p>
+                    </div>
+
+                    {/* Notas */}
+                    <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid var(--grey-border)' }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '11px', textTransform: 'uppercase', color: 'var(--grey-text)', fontWeight: 700 }}>Instrucciones Especiales</p>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--primary-navy)', fontWeight: 600 }}>Ninguna</p>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: 'var(--grey-text)' }}>Entrega estándar</p>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '12px', backgroundColor: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                    <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: 700, color: 'var(--primary-navy)' }}>📞 ¿Necesitas ayuda?</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: 'var(--grey-text)' }}>Contacta a nuestro equipo de soporte: soporte@portal.com.mx o +52 55 5678 9012</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const CartView = ({ items, onUpdateQty, onRemove, onCheckout, onContinueShopping }) => {
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   if (items.length === 0) {
@@ -1374,6 +1794,24 @@ const CartView = ({ items, onUpdateQty, onRemove, onCheckout }) => {
         <ShoppingCart size={64} style={{ color: 'var(--grey-border)', marginBottom: '24px' }} />
         <h2 style={{ color: 'var(--grey-text)' }}>Tu carrito de distribución está vacío</h2>
         <p style={{ color: 'var(--grey-text)', marginTop: '8px' }}>Explora el catálogo para realizar pedidos industriales.</p>
+        <button
+          onClick={onContinueShopping}
+          style={{
+            marginTop: '28px',
+            padding: '12px 24px',
+            borderRadius: '10px',
+            border: '1px solid var(--grey-border)',
+            backgroundColor: 'white',
+            color: 'var(--primary-navy)',
+            cursor: 'pointer',
+            fontWeight: 700,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}
+        >
+          <ChevronLeft size={16} /> Volver al Catálogo
+        </button>
       </div>
     );
   }
@@ -1381,7 +1819,25 @@ const CartView = ({ items, onUpdateQty, onRemove, onCheckout }) => {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '32px', animation: 'fadeIn 0.4s ease' }}>
       <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--grey-border)', padding: '24px' }}>
-        <h3 style={{ marginBottom: '24px' }}>Resumen del Pedido Industrial</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <button
+            onClick={onContinueShopping}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'none',
+              border: 'none',
+              color: 'var(--primary-navy)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              padding: 0
+            }}
+          >
+            <ChevronLeft size={16} /> Seguir comprando
+          </button>
+          <h3 style={{ margin: 0 }}>Resumen del Pedido</h3>
+        </div>
         {items.map(item => (
           <div key={item.id} style={{ display: 'flex', gap: '20px', padding: '16px 0', borderBottom: '1px solid var(--bg-slate)' }}>
             <div style={{ width: '100px', height: '100px', padding: '10px', backgroundColor: '#f8fafc', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1400,7 +1856,7 @@ const CartView = ({ items, onUpdateQty, onRemove, onCheckout }) => {
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontWeight: 700 }}>${(item.price * item.quantity).toFixed(2)}</p>
+              <p style={{ fontWeight: 700 }}>${(item.price * item.quantity).toFixed(2)} MXN</p>
               <p style={{ fontSize: '11px', color: 'var(--grey-text)' }}>${item.price.toFixed(2)} c/u</p>
             </div>
           </div>
@@ -1411,7 +1867,7 @@ const CartView = ({ items, onUpdateQty, onRemove, onCheckout }) => {
         <h3 style={{ marginBottom: '24px' }}>Resumen de Pedido</h3>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
           <span>Subtotal</span>
-          <span>${total.toFixed(2)}</span>
+          <span>\${total.toFixed(2)} MXN</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <span>Logística & Envío</span>
@@ -1419,7 +1875,7 @@ const CartView = ({ items, onUpdateQty, onRemove, onCheckout }) => {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px', fontSize: '20px', fontWeight: 700 }}>
           <span>Total Est.</span>
-          <span>${total.toFixed(2)}</span>
+          <span>${total.toFixed(2)} MXN</span>
         </div>
         <button
           onClick={onCheckout}
@@ -1452,8 +1908,25 @@ const CartView = ({ items, onUpdateQty, onRemove, onCheckout }) => {
 const OpenPayView = ({ total, onPaymentComplete, onCancel }) => {
   const [method, setMethod] = useState('card'); // 'card', 'bank', 'store'
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const [cardName, setCardName] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
 
   const handlePay = () => {
+    // Prevent payment if required form fields are empty
+    if (method === 'card') {
+      if (!cardName.trim() || !cardNumber.trim() || !cardExpiry.trim() || !cardCvv.trim()) {
+        setError('Completa todos los campos de tarjeta para continuar.');
+        return;
+      }
+    }
+
+
+
+    setError('');
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -1465,24 +1938,48 @@ const OpenPayView = ({ total, onPaymentComplete, onCancel }) => {
     <div style={{ display: 'grid', gap: '20px', animation: 'fadeIn 0.3s ease' }}>
       <div style={{ display: 'grid', gap: '8px' }}>
         <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary-navy)' }}>Nombre en la tarjeta</label>
-        <input type="text" placeholder="Como aparece en la tarjeta" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--grey-border)', fontSize: '14px' }} />
+        <input
+          value={cardName}
+          onChange={(e) => setCardName(e.target.value)}
+          type="text"
+          placeholder="Como aparece en la tarjeta"
+          style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--grey-border)', fontSize: '14px' }}
+        />
       </div>
       <div style={{ display: 'grid', gap: '8px' }}>
         <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary-navy)' }}>Número de tarjeta</label>
         <div style={{ position: 'relative' }}>
-          <input type="text" placeholder="0000 0000 0000 0000" style={{ padding: '12px 12px 12px 48px', borderRadius: '8px', border: '1px solid var(--grey-border)', fontSize: '14px', width: '100%', boxSizing: 'border-box' }} />
+          <input
+            value={cardNumber}
+            onChange={(e) => setCardNumber(e.target.value)}
+            type="text"
+            placeholder="0000 0000 0000 0000"
+            style={{ padding: '12px 12px 12px 48px', borderRadius: '8px', border: '1px solid var(--grey-border)', fontSize: '14px', width: '100%', boxSizing: 'border-box' }}
+          />
           <CardIcon size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--grey-text)' }} />
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         <div style={{ display: 'grid', gap: '8px' }}>
           <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary-navy)' }}>Fecha de expiración</label>
-          <input type="text" placeholder="MM/AA" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--grey-border)', fontSize: '14px' }} />
+          <input
+            value={cardExpiry}
+            onChange={(e) => setCardExpiry(e.target.value)}
+            type="text"
+            placeholder="MM/AA"
+            style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--grey-border)', fontSize: '14px' }}
+          />
         </div>
         <div style={{ display: 'grid', gap: '8px' }}>
           <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary-navy)' }}>CVV</label>
           <div style={{ position: 'relative' }}>
-            <input type="text" placeholder="123" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--grey-border)', fontSize: '14px', width: '100%', boxSizing: 'border-box' }} />
+            <input
+              value={cardCvv}
+              onChange={(e) => setCardCvv(e.target.value)}
+              type="text"
+              placeholder="123"
+              style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--grey-border)', fontSize: '14px', width: '100%', boxSizing: 'border-box' }}
+            />
             <Lock size={16} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--grey-text)' }} />
           </div>
         </div>
@@ -1504,7 +2001,7 @@ const OpenPayView = ({ total, onPaymentComplete, onCancel }) => {
       <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>Se generará una referencia CLABE única para que realices tu pago desde tu banca electrónica.</p>
       <div style={{ backgroundColor: 'white', padding: '16px', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
         <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 4px 0' }}>Beneficiario</p>
-        <p style={{ fontWeight: 700, margin: '0 0 12px 0' }}>ASTROLLANTAS MÉXICO S.A. DE C.V.</p>
+        <p style={{ fontWeight: 700, margin: '0 0 12px 0' }}>&lt;nombre_razon_social&gt;</p>
         <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 4px 0' }}>CLABE</p>
         <p style={{ fontWeight: 700, fontSize: '18px', letterSpacing: '2px', margin: 0 }}>0000 0000 0000 0000 00</p>
       </div>
@@ -1578,18 +2075,24 @@ const OpenPayView = ({ total, onPaymentComplete, onCancel }) => {
             <div style={{ display: 'grid', gap: '12px', marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid var(--bg-slate)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                 <span style={{ color: 'var(--grey-text)' }}>Subtotal</span>
-                <span>${total.toLocaleString()}</span>
+                <span>${total.toLocaleString()} MXN</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                 <span style={{ color: 'var(--grey-text)' }}>IVA (16%)</span>
-                <span>${(total * 0.16).toLocaleString()}</span>
+                <span>${(total * 0.16).toLocaleString()} MXN</span>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', fontWeight: 800, marginBottom: '24px', color: 'var(--primary-navy)' }}>
               <span>Total</span>
-              <span>${(total * 1.16).toLocaleString()}</span>
+              <span>${(total * 1.16).toLocaleString()} MXN</span>
             </div>
             
+            {error && (
+              <div style={{ marginBottom: '16px', padding: '12px 14px', backgroundColor: 'rgba(248, 113, 113, 0.15)', border: '1px solid rgba(248, 113, 113, 0.35)', borderRadius: '10px', color: '#b91c1c', fontSize: '14px' }}>
+                {error}
+              </div>
+            )}
+
             <button
               onClick={handlePay}
               disabled={loading}
@@ -1747,17 +2250,12 @@ const App = () => {
     switch (view) {
       case 'home': return <HomeDashboard user={user} onViewChange={handleViewChange} />;
       case 'b2b': return <CatalogView products={products} onAddToCart={addToCart} onUpdateQty={updateCartQty} cart={cart} searchTerm={searchTerm} onSearchChange={setSearchTerm} />;
-      case 'cart': return <CartView items={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onCheckout={() => handleViewChange('payment')} />;
+      case 'cart': return <CartView items={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onCheckout={() => handleViewChange('payment')} onContinueShopping={() => handleViewChange('b2b')} />;
       case 'payment': return <OpenPayView total={cart.reduce((s, i) => s + i.price * i.quantity, 0)} onPaymentComplete={() => setOrderPlaced(true)} onCancel={() => handleViewChange('cart')} />;
       case 'account': return <AccountStatement user={user} />;
       case 'promos': return <PromotionsView />;
       case 'billing': return <BillingView />;
-      case 'orders': return (
-        <div style={{ textAlign: 'center', padding: '100px', backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--grey-border)' }}>
-          <ClipboardList size={48} color="var(--grey-border)" />
-          <h3 style={{ marginTop: '16px', color: 'var(--grey-text)' }}>No hay órdenes pendientes de entrega</h3>
-        </div>
-      );
+      case 'orders': return <OrdersView />;
       default: return null;
     }
   };
