@@ -53,7 +53,8 @@ const PRODUCT_FIBER = "/assets/b2b_specialized_fiber_reels.png";
 const PRODUCT_ADHESIVE = "/assets/b2b_industrial_adhesive_drums.png";
 
 // En desarrollo: localhost, en producción: Azure Functions
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Detectar si el entorno es producción en Azure SWA o desarrollo local
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 // --- COMPONENTS ---
 
@@ -70,7 +71,8 @@ const Login = ({ onLogin }) => {
 
   const handleSubmit = () => {
     setLoading(true);
-    fetch(`${API_URL}/auth/login`, {
+    // Con Azure Functions el endpoint es el nombre de la carpeta: auth-login
+    fetch(`${API_URL}/auth-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials)
