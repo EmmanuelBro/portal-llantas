@@ -1754,7 +1754,7 @@ const OrdersView = () => {
                     {/* Contacto */}
                     <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid var(--grey-border)' }}>
                       <p style={{ margin: '0 0 8px 0', fontSize: '11px', textTransform: 'uppercase', color: 'var(--grey-text)', fontWeight: 700 }}>Contacto de Entrega</p>
-                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--primary-navy)', fontWeight: 600 }}>ebriseno@axtel.com.mx</p>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--primary-navy)', fontWeight: 600 }}>Usuario30891</p>
                       <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: 'var(--grey-text)' }}>+52 55 1234 5678</p>
                     </div>
 
