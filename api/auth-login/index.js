@@ -1,5 +1,7 @@
 module.exports = async function (context, req) {
-  context.res.headers['Content-Type'] = 'application/json';
+  context.res = {
+    headers: { 'Content-Type': 'application/json' }
+  };
 
   try {
     const { username, password } = req.body;

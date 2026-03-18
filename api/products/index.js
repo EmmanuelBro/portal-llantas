@@ -1,5 +1,7 @@
 module.exports = async function (context, req) {
-  context.res.headers['Content-Type'] = 'application/json';
+  context.res = {
+    headers: { 'Content-Type': 'application/json' }
+  };
 
   try {
     // Mock Products Data (B2B Automotive/Tyre)
@@ -129,19 +131,19 @@ module.exports = async function (context, req) {
           '/tire_heavy_truck_v2.png'
         ];
         return {
-          id: \`TYRE-GEN-\${700 + i}\`,
-          name: \`Llantas Nexen Roadian HTX RH5 Series \${i + 1}\`,
+          id: `TYRE-GEN-${700 + i}`,
+          name: `Llantas Nexen Roadian HTX RH5 Series ${i + 1}`,
           category: i % 2 === 0 ? 'Camioneta / SUV' : 'Auto Premium',
           price: 2100.00 + (i * 150),
           unit: 'Pieza',
           image: '/tire_nexen_v2.png',
-          specs: [\`Medida: 2\${i % 9}5/65R1\${i % 5 + 6}\`, 'Tracción: A', 'Temperatura: B'],
+          specs: [`Medida: 2${i % 9}5/65R1${i % 5 + 6}`, 'Tracción: A', 'Temperatura: B'],
           techSpecs: {
-            width: \`2\${i % 9}5\`,
+            width: `2${i % 9}5`,
             ratio: '65',
             construction: 'R',
-            rim: \`1\${i % 5 + 6}\`,
-            load: \`\${90 + i}\`,
+            rim: `1${i % 5 + 6}`,
+            load: `${90 + i}`,
             speed: 'H (210 km/h)'
           },
           discountTiers: [{ min: 4, discount: '5%' }, { min: 20, discount: '10%' }],
