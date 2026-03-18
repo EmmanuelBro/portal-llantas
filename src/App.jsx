@@ -332,7 +332,7 @@ const HomeDashboard = ({ user, onViewChange }) => {
         <h2 style={{ fontSize: '32px', color: 'var(--primary-navy)', marginBottom: '16px' }}>En el Portal de Distribución Mayorista</h2>
         <p style={{ fontSize: '18px', color: 'var(--grey-text)', lineHeight: '1.6' }}>
           Contamos con una amplia variedad de llantas para equipar el espacio de tus Almacenes.
-          <b> Conoce las últimas tendencias en tecnología automotriz</b> y haz de cualquier flota un equipo único.
+          Haz de cualquier flota un equipo único.
         </p>
       </div>
 
